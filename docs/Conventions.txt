@@ -1,0 +1,19 @@
+Conventions.txt
+
+The main simplification used in this package is with regards to time: time
+is a real variable, with one year corresponding to 1 unit on the time axis. Therefore,
+the beginning of year 2000 is "2000.", and mid-2015 is "2015.5",
+
+The second simplification is that interest rates are quoted using an annual compounding
+convention. For example, a $1 investment compounded at "5%" for two years will have a value
+$1 * (1.05) * (1.05). A 5% yield will be denoted as "0.05" in function inputs.
+
+The only other yield conventions expected to be used will be for example purposes.
+For example:
+- A simplified semi-annual bond yield convention. This will only be used to illustrate how bond yield
+  conventions operate.
+- Simplified money market discount conventions.
+
+Prices will be quoted as 100 = par value, and on a direy-price basis. Accrued interest will only
+appear in examples illustrating how it works. Since most examples will be calculated on coupon dates,
+accrued interest will not matter.
