@@ -58,6 +58,7 @@ def create_grid(start, stop, frequency):
     if stop < start:
         raise ValueError('Stop point must be after start')
     frequency = float(frequency)
+    start = float(start)
     interval = int(frequency * (stop - start))
     #  Generate an integer grid
     out = range(0, interval + 1)
