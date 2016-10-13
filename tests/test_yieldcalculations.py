@@ -19,3 +19,12 @@ class TestDF(TestCase):
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(yieldcalculations))
     return tests
+
+
+class TestDF_exponential(TestCase):
+    def test_DF_exponential_list(self):
+        t = [1., 2.]
+        r = [.05, .05]
+        out = yieldcalculations.DF_exponential(t, r)
+        out = [round(x,4) for x in out]
+        self.assertEqual(out, [.9512, .9048])

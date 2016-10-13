@@ -54,6 +54,28 @@ def DF(mat, r):
         out = math.pow(1. + r, -mat)
     return out
 
+def DF_exponential(mat, r):
+    """
+    DF_exponential(mat, r) - Discount factor, for a given maturity (years) and exponential zero rate r.
+    :param mat: float
+    :param r: float
+    :return: float
+
+    For example, calculate the exponential discount factor for a 5% zero rate after one year
+    (rounded to 4 decimal places).
+    >>> round(DF_exponential(1., .05), 4)
+    0.9512
+    """
+    if type(mat) is list:
+        out = [None, ] * len(mat)
+        for i in range(0, len(mat)):
+            out[i] = math.exp(-r[i] * mat[i])
+    else:
+        out = math.exp(-r * mat)
+    return out
+
+
+
 def ZRfromDF(mat, DF):
     """
     ZRfromDF(mat, DF) - Zero Rate from Discount Factor

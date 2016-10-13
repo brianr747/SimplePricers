@@ -36,10 +36,11 @@ except ImportError:
 
 
 class Quick2DPlot(object):
-    def __init__(self, x, y, run_immediately=True):
+    def __init__(self, x, y, title='', run_now=True):
         self.X = x
         self.Y = y
-        if run_immediately:
+        self.Title = title
+        if run_now:
             self.DoPlot()
 
     def DoPlot(self):
@@ -49,5 +50,8 @@ class Quick2DPlot(object):
             for i in range(0, len(self.X)):
                 print('%f %20f', (self.X[i], self.Y[i]))
             return
-        plt.plot(self.X, self.Y)
+        plt.plot(self.X, self.Y, marker='o')
+        if len(self.Title) > 0:
+            plt.title(self.Title)
+        plt.grid()
         plt.show()
