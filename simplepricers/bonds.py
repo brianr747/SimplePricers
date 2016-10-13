@@ -3,6 +3,12 @@ bonds.py
 
 Bond calculations.
 
+Documentation comments refer to:
+
+[Faboozzi 2000] "Fixed Income Analysis for the Chartered Financial Analyst Program,
+        2000, ISBN 1-883249-83-X.
+
+
 Copyright 2016 Brian Romanchuk
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +27,7 @@ limitations under the License.
 import math
 
 from simplepricers.utils import create_grid
+import simplepricers.yieldcalculations as yc
 
 
 class Bond(object):
@@ -28,7 +35,7 @@ class Bond(object):
     Bond - Abstract base class for bonds.
     """
 
-    def __init__(self, mat=None, coupon=None, coupon_freq=None, now=None):
+    def __init__(self, mat=None, coupon=None, coupon_freq=None, now=0.):
         """
         Set parameters for the bond.
 
@@ -62,6 +69,27 @@ class Bond(object):
         :return: float
         """
         pass
+
+    def CalcDuration(self, yld, now=None, yield_convention='bond'):
+        """
+        CalcDuration - Calculate the duration with yield shocks.
+
+        For example, calculate for a 9% 20-year bond at 6%. Based on [Fabozzi2000, page 256]
+        >>> obj = CouponBond(20., .09, 2)
+        >>> dur = obj.CalcDuration(.06)
+        >>> round(dur,2)
+        10.66
+
+        :param yld: float
+        :param now: float
+        :param yield_convention: str
+        :return: float
+        """
+        bp = .0001
+        p_orig = self.GetPrice(yld, now, price_type='dirty', yield_convention=yield_convention)
+        p_up = self.GetPrice(yld + bp, now, price_type='dirty', yield_convention=yield_convention)
+        p_dn = self.GetPrice(yld - bp, now, price_type='dirty', yield_convention=yield_convention)
+        return (p_dn - p_up) / (2. * p_orig * bp)
 
 
 class Consol(Bond):
@@ -154,5 +182,43 @@ class CouponBond(Bond):
         self.CashFlows = [coupon_payment] * (len(self.CashFlowDates) - 1)
         self.CashFlows.append(self.PriceBase + coupon_payment)
 
-    def GetPrice(self, yld, now=None, price_type='dirty', yield_convention='bond'):
+    def GetPrice(self, yld, now=None, price_type='clean', yield_convention='bond'):
+        """
+        GetPrice - Returns the price.
+
+        Under construction, only supports: price_type='dirty', yield_convention='bond'
+        Note: that this forces you to specify price='dirty', even though clean prices
+        are not yet supported! (This way we future-proof code.)
+
+        A 4-year 10% coupon bond, at a 8% yield
+        (From  [Fabozzi2000] pages 155-6.)
+        >>> obj = CouponBond(4., .10, coupon_freq=2)
+        >>> price = obj.GetPrice(.08, price_type='dirty')
+        >>> round(price, 4)
+        106.7327
+
+        A 4 year, 10% annual coupon bond, with 12% yield.
+        (Also from Fabozzi, pages 150-151.)
+        >>> obj = CouponBond(4., .10, coupon_freq=1)
+        >>> price = obj.GetPrice(.12, price_type='dirty')
+        >>> round(price, 4)
+        93.9253
+
+        :param yld: float
+        :param now: float
+        :param price_type: str
+        :param yield_convention: str
+        :return: float
+        """
+        if yield_convention != 'bond':
+            raise NotImplementedError('Unsupported yield_convention')
+        if price_type != 'dirty':
+            raise NotImplementedError('Unsupported price_type convention')
+        if self.CouponFrequency == 2:
+            yld = yc.ConvertRate(yld, '2', '1')
         self.GenerateCashFlows(now)
+        NPV = 0.
+        df = yc.DF(self.CashFlowDates, [yld, ] * len(self.CashFlowDates))
+        for i in range(0, len(self.CashFlows)):
+            NPV += df[i] * self.CashFlows[i]
+        return NPV

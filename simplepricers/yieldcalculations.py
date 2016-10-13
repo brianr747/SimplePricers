@@ -118,7 +118,7 @@ def ZRfromDF(mat, df):
     NotImplementedError: Under construction!
 
     :param mat: float
-    :param DF: float
+    :param df: float
     :return: float
     """
     raise NotImplementedError('Under construction!')

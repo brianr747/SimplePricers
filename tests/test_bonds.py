@@ -59,5 +59,12 @@ class TestCouponBond(TestCase):
         self.assertEqual(obj.CashFlowDates, [])
         self.assertEqual(obj.CashFlows, [])
 
-    def test_GetPrice(self):
-        pass # self.fail()
+    def test_GetPrice_fail_yield(self):
+        obj = CouponBond(2., .05, coupon_freq=1)
+        with self.assertRaises(NotImplementedError):
+            obj.GetPrice(.02, price_type='dirty', yield_convention='semiannual')
+
+    def test_GetPrice_fail_price(self):
+        obj = CouponBond(2., .05, coupon_freq=1)
+        with self.assertRaises(NotImplementedError):
+            obj.GetPrice(.02, price_type='clean')
