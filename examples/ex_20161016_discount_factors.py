@@ -15,6 +15,7 @@ except ImportError:
     raise
 
 from plot_for_examples import Quick2DPlot
+
 # ------------------------------------------------------
 # Show discount factors
 t = create_grid(0., 10., 1)
@@ -35,12 +36,12 @@ CF = [4., 104.]
 NPV = 0.
 for i in range(0, len(t)):
     NPV += CF[i] * df[i]
-print('NPV=', round(NPV,4))
+print('NPV=', round(NPV, 4))
 
 print('Cash flow Grid')
 print('t', 'zerorate', 'DF', 'CF', 'NPV of CF')
 for mat, zr, disc, c_f in zip(t, r, df, CF):
-    print(mat, zr, disc, c_f, c_f*disc)
+    print(mat, zr, disc, c_f, c_f * disc)
 # --------------------------------------------------------
 print('Third example: calculate the NPV of a 2-year bond (4% semi-annual coupon)')
 print('Use same 4% zero rate.')
@@ -58,7 +59,7 @@ print('NPV=', round(NPV, 4))
 print('Cash flow Grid')
 print('t', 'zerorate', 'DF', 'CF', 'NPV of CF')
 for mat, zr, disc, c_f in zip(t, r, df, CF):
-    print(mat, zr, disc, c_f, c_f*disc)
+    print(mat, zr, disc, c_f, c_f * disc)
 # --------------------------------------------------------
 print('Fourth example: calculate the NPV of a 2-year bond (4% semi-annual coupon)')
 print('Map the discount rate to semi-annual convention.')
@@ -78,7 +79,7 @@ print('NPV=', round(NPV, 4))
 print('Cash flow Grid')
 print('t', 'zerorate', 'DF', 'CF', 'NPV of CF')
 for mat, zr, disc, c_f in zip(t, r, df, CF):
-    print(mat, zr, disc, c_f, c_f*disc)
+    print(mat, zr, disc, c_f, c_f * disc)
 # --------------------------------------------------------
 print('Fifth example: calculate the NPV of a 2-year bond (4% annual coupon)')
 print('Use a 4% exponential discount rate')
@@ -96,4 +97,4 @@ print('NPV=', round(NPV, 4))
 print('Cash flow Grid')
 print('t', 'zerorate', 'DF', 'CF', 'NPV of CF')
 for mat, zr, disc, c_f in zip(t, r, df, CF):
-    print(mat, zr, disc, c_f, c_f*disc)
+    print(mat, zr, disc, c_f, c_f * disc)

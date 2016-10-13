@@ -50,6 +50,9 @@ def create_grid(start, stop, frequency):
     ...
     ValueError: Stop point must be after start
 
+    NOTE: There are similar functions in NumPy (arange, ...), but I do not want to introduce
+    a major dependence on non-standard libraries here.
+
     :param start: float
     :param stop: float
     :param frequency: int
