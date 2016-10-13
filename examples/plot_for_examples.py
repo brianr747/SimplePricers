@@ -40,6 +40,9 @@ class Quick2DPlot(object):
         self.X = x
         self.Y = y
         self.Title = title
+        self.XLabel = None
+        self.YLabel = None
+        self.Legend = None
         if run_now:
             self.DoPlot()
 
@@ -50,8 +53,17 @@ class Quick2DPlot(object):
             for i in range(0, len(self.X)):
                 print('%f %20f', (self.X[i], self.Y[i]))
             return
-        plt.plot(self.X, self.Y, marker='o')
+        if type(self.X[0]) == list:
+            plt.plot(self.X[0], self.Y[0], self.X[1], self.Y[1], marker='o')
+        else:
+            plt.plot(self.X, self.Y, marker='o')
         if len(self.Title) > 0:
             plt.title(self.Title)
         plt.grid()
+        if self.XLabel is not None:
+            plt.xlabel(self.XLabel)
+        if self.YLabel is not None:
+            plt.ylabel(self.YLabel)
+        if self.Legend is not None:
+            plt.legend(self.Legend)
         plt.show()

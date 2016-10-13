@@ -5,7 +5,6 @@ Example code for discount factors.
 
 """
 
-import math
 
 try:
     from simplepricers.utils import create_grid
