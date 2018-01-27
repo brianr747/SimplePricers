@@ -19,7 +19,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
 import matplotlib.pyplot as plt
 
 plt.plot([1, 4, 9, 16])
