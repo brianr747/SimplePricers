@@ -9,6 +9,7 @@ from unittest import TestCase
 import doctest
 
 import simplepricers.yieldcalculations as yieldcalculations
+from simplepricers.bonds_curves import ZeroCurve
 
 
 def load_tests(loader, tests, ignore):
@@ -47,3 +48,12 @@ class TestConvertRate(TestCase):
     def test_unsupported(self):
         with self.assertRaises(NotImplementedError):
             yieldcalculations.ConvertRate(.02, '5', '1')
+
+
+class TestZeroCurve(TestCase):
+    def test_df1(self):
+        obj = ZeroCurve([0., 1.], [.04, .05])
+        # At T=1, zero rate = .05, so DF = 1/1.05
+        self.assertEqual(1/1.05, obj.GetDF(1,))
+        # At T=0.5, zero rate = 4.5%; so = 1/(1.045)^.5
+        self.assertEqual(1/pow(1.045, .5), obj.GetDF(.5))

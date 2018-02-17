@@ -8,7 +8,7 @@ Example code for duration.
 try:
     from simplepricers.utils import create_grid
     import simplepricers.yieldcalculations as yc
-    import simplepricers.bonds as bonds
+    import simplepricers.bonds_curves as bonds
 except ImportError:
     print('If these imports fail, put the base directory above onto the PYTHONPATH')
     raise

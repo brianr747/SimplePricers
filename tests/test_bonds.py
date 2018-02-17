@@ -7,9 +7,10 @@ Note that some tests are done as doctests.
 from unittest import TestCase
 import doctest
 
-from simplepricers.bonds import Consol
-from simplepricers.bonds import CouponBond
-import simplepricers.bonds as bonds
+from simplepricers.bonds_curves import Consol, ZeroCurve
+from simplepricers.bonds_curves import CouponBond
+import simplepricers.bonds_curves as bonds
+from simplepricers.bonds_curves import ZeroCurve
 
 
 def load_tests(loader, tests, ignore):
@@ -68,3 +69,15 @@ class TestCouponBond(TestCase):
         obj = CouponBond(2., .05, coupon_freq=1)
         with self.assertRaises(NotImplementedError):
             obj.GetPrice(.02, price_type='clean')
+
+    def test_yield1(self):
+        obj = CouponBond(2., .05, coupon_freq=1)
+        self.assertAlmostEqual(.05, obj.GetYield(0, 100., 'dirty', 'bond'), places=4)
+        obj = CouponBond(2., .05, coupon_freq=2)
+        self.assertAlmostEqual(.05, obj.GetYield(0, 100., 'dirty', 'bond'), places=4)
+
+
+    def test_ZeroCurvePrice(self):
+        obj = CouponBond(2., .05, coupon_freq=1)
+        ZC = ZeroCurve([0., 3.], [.05, .05])
+        self.assertAlmostEqual(100., obj.GetPriceFromZeroCurve(0., ZC, price_type='dirty'))

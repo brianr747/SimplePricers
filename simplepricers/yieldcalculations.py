@@ -102,8 +102,12 @@ def ConvertRate(r_in, in_convention, out_convention):
         raise NotImplementedError('Unsupported rate convention')
     # Always convert to annual simple, then convert to target out
     # Currently, only support annual
-    assert (out_convention == '1')
-    return r_ann
+    if out_convention == '1':
+        return r_ann
+    elif out_convention == '2':
+        return 2*(pow(1+r_ann,0.5) - 1)
+    else:
+        raise NotImplementedError('Unsupported output convention')
 
 
 def ZRfromDF(mat, df):
@@ -122,3 +126,5 @@ def ZRfromDF(mat, df):
     :return: float
     """
     raise NotImplementedError('Under construction!')
+
+

@@ -1,7 +1,7 @@
 """
-bonds.py
+bonds_curves.py
 
-Bond calculations.
+Bond and curve calculations.
 
 Documentation comments refer to:
 
@@ -28,6 +28,8 @@ import math
 
 from simplepricers.utils import create_grid
 import simplepricers.yieldcalculations as yc
+from simplepricers.yieldcalculations import DF
+from simplepricers.simple_calendar import Indexation
 
 
 class Bond(object):
@@ -222,3 +224,189 @@ class CouponBond(Bond):
         for i in range(0, len(self.CashFlows)):
             NPV += df[i] * self.CashFlows[i]
         return NPV
+
+    def GetYield(self, now, price, price_type='clean', yield_convention='bond', guess=(0., .25), toler=1e-6):
+        """
+        Ugly yield calculation...
+        :param now: float
+        :param price: float
+        :param price_type: str
+        :param yield_convention: str
+        :param guess: tuple
+        :return: float
+        """
+        if yield_convention != 'bond':
+            raise NotImplementedError('Unsupported yield_convention')
+        if price_type != 'dirty':
+            raise NotImplementedError('Unsupported price_type convention')
+
+        self.GenerateCashFlows(now)
+
+        def get_price(y):
+            NPV = 0.
+            df = yc.DF(self.CashFlowDates, [y, ] * len(self.CashFlowDates))
+            for i in range(0, len(self.CashFlows)):
+                NPV += df[i] * self.CashFlows[i]
+            return NPV
+
+        low, high = guess[0:2]
+        price_lo = get_price(low)
+        price_hi = get_price(high)
+        # Yield downn, price up!
+        if not (price < price_lo) and (price > price_hi):
+            raise ValueError('Answer not bracketed by guess!')
+        yld = (low + high) / 2.
+        while (high-low) > toler:
+            yld = (low + high) / 2.
+            estimate = get_price(yld)
+            if price > estimate:
+                # Estimated price is too low -> yield too high
+                high = yld
+            else:
+                low = yld
+        if self.CouponFrequency == 2:
+            yld = yc.ConvertRate(yld, '1', '2')
+        return yld
+
+
+    def GetPriceFromZeroCurve(self, now, ZC, price_type='clean'):
+        """
+        Get the fair value off of a ZeroCurve object.
+
+        Although price_type only supports 'dirty' for now. Left this way to future-proof code.
+
+        :param now: float
+        :param ZC: ZeroCurve
+        :param price_type: str
+        :return: float
+        """
+        if price_type != 'dirty':
+            raise NotImplementedError('Unsupported price_type convention')
+        self.GenerateCashFlows(now)
+        NPV = 0.
+        df = [ZC.GetDF(x) for x in self.CashFlowDates]
+        for i in range(0, len(self.CashFlows)):
+            NPV += df[i] * self.CashFlows[i]
+        return NPV
+
+
+class InflationLinkedBond(CouponBond):
+    def __init__(self, mat=None, coupon=None, coupon_freq=1, now=0., issue_date=0.):
+        super().__init__(mat, coupon, coupon_freq, now)
+        self.InflationCurve = Indexation()
+        self.InflationCurve.SetIndexValues([issue_date], [1.])
+
+    def CalcEconomicBreakeven(self, now, price, ZC, price_type='clean', toler=.00001, guess=(-.05,.1)):
+        if not price_type=='dirty':
+            raise NotImplementedError('Only dirty price supported')
+        lo, hi = guess[0:2]
+        self.GenerateCashFlows(now)
+
+        DF = [ZC.GetDF(x) for x in self.CashFlowDates]
+
+        def get_NPV(inf):
+            self.InflationCurve.ExtrapolationRate = inf
+            NPV = 0.0
+            for d, cf, d_df in zip(self.CashFlowDates, self.CashFlows, DF):
+                NPV += d_df * cf * self.InflationCurve.GetValue(d)
+            return NPV
+
+        mid = (hi + lo)/2.
+        if lo >= hi:
+            raise ValueError('Invalid initial guess!')
+        while (hi-lo) > toler:
+            mid = (hi + lo) / 2.
+            NPV = get_NPV(mid)
+            if NPV > price:
+                # NPV too high -> guess too high -> hi=mid
+                hi = mid
+            else:
+                lo = mid
+        return mid
+
+
+
+
+class ZeroCurve(object):
+    """
+    ZeroCurve object - handles basic nominal discounting
+
+    Uses the simple interest rate convention.
+    """
+    def __init__(self, mats=(), ZC=()):
+        """
+        Initialise the ZeroCurve
+        :param ZC: list
+        :param mats: list
+        """
+        if not len(ZC) == len(mats):
+            raise ValueError('Zero curve and maturities must be equal length')
+        self.ZC = list(ZC)
+        self.Maturities = list(mats)
+
+    def GetZeroRate(self, mat):
+        """
+        Get the zero rate at a particular maturity point, must be interior.
+        Note that if shortest maturity > 0, we use it for all maturities up to that point as well.
+
+        Note that we assume that the maturity list is sorted
+        :param mat: float
+        :return: float
+        """
+        if mat < 0:
+            raise ValueError('Negative maturity - fail')
+        if mat > self.Maturities[-1]:
+            raise ValueError('Maturity longer than longest zero maturity')
+        if mat <= self.Maturities[0]:
+            return self.Maturities[0]
+        prev_mat = self.Maturities[0]
+        prev_zero = self.ZC[0]
+        # We already tested for the shortest maturity
+        for pos in range(1, len(self.Maturities)):
+            if self.Maturities[pos] == mat:
+                return self.ZC[pos]
+            if self.Maturities[pos] > mat:
+                fac = (mat - prev_mat)/(self.Maturities[pos] - prev_mat)
+                return ((1-fac)*prev_zero) + (fac*self.ZC[pos])
+            prev_mat = self.Maturities[pos]
+            prev_zero = self.ZC[pos]
+
+    def GetDF(self, mat):
+        """
+        Return the associated discount factor for a maturity.
+        Assumes that the maturity list is sorted.
+        :param mat: float
+        :return: float
+        """
+        r = self.GetZeroRate(mat)
+        return DF(mat, r)
+
+    def CalcParCoupon(self, mat, coupon_freq=1, toler=.000001, guess=(None,None)):
+        if not(mat==round(mat)):
+            raise NotImplementedError('Non-integer maturities not supported yet')
+        # Set bounds; hopefully conservative enough
+        lo, hi = guess[0:2]
+        if lo is None:
+            lo = min(self.ZC)-.01
+        if hi is None:
+            hi = max(self.ZC)+.01
+        if lo > hi:
+            raise ValueError('Bad Guess')
+        # Assume bounds are OK. TODO: validate guess
+        # This line is redundant, but the code validation is unhappy if it missing
+        mid = (lo + hi)/2.
+        price = 0.
+        bond = CouponBond(mat, coupon=mid, coupon_freq=coupon_freq)
+        while (hi-lo)>toler:
+            mid = (lo+hi)/2.
+            bond.Coupon = mid
+            # Since we only have dirty prices, that is why we assume an integer number of years
+            price = bond.GetPriceFromZeroCurve(0, self, price_type='dirty')
+            if price > 100.:
+                # coupon is too high, so mid becomes upper bound
+                hi = mid
+            else:
+                lo = mid
+        if abs(price-100.) > .001:
+            raise ValueError('Initial guess range does not cover actual value')
+        return mid

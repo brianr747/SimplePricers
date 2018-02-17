@@ -77,6 +77,7 @@ class Indexation(object):
     def __init__(self):
         self.Calendar = SimpleCalendar360()
         self.IndexDateValues = []
+        self.ExtrapolationRate = None
 
     def SetIndexValues(self, dates, values):
         """
@@ -121,7 +122,9 @@ class Indexation(object):
             prev_v = v
         # If we get here, we are outside the interval
         # TODO: Add an extrapolation feature.
-        raise ValueError('Date greater than index data')
+        if self.ExtrapolationRate is None:
+            raise ValueError('Date greater than index data')
+        return prev_v*pow(1+self.ExtrapolationRate,date-prev_d)
 
 
 

@@ -32,3 +32,10 @@ class TestIndexation(TestCase):
         obj.SetIndexValues([2., 1.], [100., 101.])
         self.assertEqual([(1., 101.), (2., 100.)], obj.IndexDateValues)
 
+    def test_extrapolation(self):
+        obj = Indexation()
+        obj.SetIndexValues([0.],[100.])
+        obj.ExtrapolationRate = .02
+        self.assertEqual(102., obj.GetValue(1.))
+        self.assertAlmostEqual(104.04, obj.GetValue(2.))
+
