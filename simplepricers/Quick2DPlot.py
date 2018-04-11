@@ -83,7 +83,17 @@ class Quick2DPlotParams(object):
 
 
 class Quick2DPlot(object):
-    def __init__(self, x, y, title='', run_now=True, output_directory=None, filename=None):
+    def __init__(self, x, y, title='', run_now=True, output_directory=None, filename=None, marker='o'):
+        """
+        Marker support only for single variable plot, "None" for no marker
+        :param x:
+        :param y:
+        :param title:
+        :param run_now:
+        :param output_directory:
+        :param filename:
+        :param marker:
+        """
         self.X = x
         self.Y = y
         self.Title = title
@@ -94,6 +104,7 @@ class Quick2DPlot(object):
         self.LegendPos = 'best'
         self.XTicks = None
         self.OutputDirectory = output_directory
+        self.Marker = marker
         if run_now:
             self.DoPlot()
 
@@ -120,7 +131,10 @@ class Quick2DPlot(object):
             ax.plot(self.X[1], self.Y[1], marker='^', markersize=4.5)
             # plt.plot(self.X[0], self.Y[0], self.X[1], self.Y[1], marker='o')
         else:
-            plt.plot(self.X, self.Y, marker='o')
+            if self.Marker is None:
+                plt.plot(self.X, self.Y)
+            else:
+                plt.plot(self.X, self.Y, marker=self.Marker)
 
         if self.XTicks is not None:
             plt.xticks(self.XTicks[0], self.XTicks[1])
