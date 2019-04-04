@@ -47,7 +47,7 @@ x_ticks = dates
 x_labels = ['%.3f' % (x,) for x in x_ticks]
 x_axis = [x_ticks, x_labels]
 
-plt = Q2D.Quick2DPlot(days, daily_values, 'Daily Index Values', run_now=False)
+plt = Q2D.Quick2DPlot(days, daily_values, 'Daily Index Values', run_now=False, filename='indexation1.png')
 plt.XTicks = x_axis
 plt.DoPlot()
 
@@ -60,7 +60,7 @@ for i in range(1, len(daily_values)):
     print(pchange)
 
 
-plt = Q2D.Quick2DPlot(days[1:], annual, 'Annualised Rate Of Change', run_now=False)
+plt = Q2D.Quick2DPlot(days[1:], annual, 'Annualised Rate Of Change', run_now=False, filename='indexation2.png')
 plt.XTicks = x_axis
 plt.DoPlot()
 
