@@ -18,7 +18,9 @@ t = list(range(0,N))
 t_float = [float(x)/12. for x in t]
 
 # force the seed to always give the same results
-random.seed(1)
+seed = input('Choose seed value (plotted example uses 0) > ')
+
+random.seed(float(seed))
 
 
 # FIRST: We generate a state variable that transitions between a "high growth" and a "low growth" state.
@@ -32,7 +34,7 @@ def state_transition(state):
         else:
             return 0
     if state == 0:
-        if random.random() < .95:
+        if random.random() < .96:
             return 0
         else:
             return 1
@@ -84,7 +86,13 @@ def cheating_MA(ser):
 # Since we are used to looking at year-on-year growth rates, this looks more
 # plausible.
 p = Quick2DPlot([t_float, t_float], [cheating_MA(growth), state], 'Random Walk Growth', run_now=False)
-p.Legend = ['Growth Rate (6-month MA)', 'State']
+p.Legend = ['Growth(6-mo MA)', 'State']
+p.OutputDirectory = 'figures'
+p.FileName = 'recession_random_walk.png'
 p.DoPlot()
+
+for x,y,z in zip(t_float, state, cheating_MA(growth)):
+    print(x, y, z)
+
 
 
