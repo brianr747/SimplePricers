@@ -87,6 +87,7 @@ class Quick2DPlot(object):
         self.FileName = filename
         self.LegendPos = 'best'
         self.OutputDirectory = output_directory
+        self.DPI = None
         if run_now:
             self.DoPlot()
 
@@ -131,10 +132,14 @@ class Quick2DPlot(object):
 
         if params.OutputDirectory is not None:
             self.OutputDirectory = params.OutputDirectory
+        if self.DPI is None:
+            dpi = params.dpi
+        else:
+            dpi = self.DPI
         if (self.OutputDirectory is not None) and (self.FileName is not None):
             fullname = os.path.join(self.OutputDirectory, self.FileName)
-            pprint('Saving File: {0} dpi={1}'.format(fullname, params.dpi))
-            plt.savefig(fullname, dpi=params.dpi)
+            pprint('Saving File: {0} dpi={1}'.format(fullname, dpi))
+            plt.savefig(fullname, dpi=dpi)
         plt.show()
 
 

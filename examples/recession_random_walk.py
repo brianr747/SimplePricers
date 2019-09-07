@@ -88,7 +88,9 @@ def cheating_MA(ser):
 p = Quick2DPlot([t_float, t_float], [cheating_MA(growth), state], 'Random Walk Growth', run_now=False)
 p.Legend = ['Growth(6-mo MA)', 'State']
 p.OutputDirectory = 'figures'
+p.DPI = 300
 p.FileName = 'recession_random_walk.png'
+
 p.DoPlot()
 
 for x,y,z in zip(t_float, state, cheating_MA(growth)):
