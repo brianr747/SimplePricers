@@ -136,10 +136,13 @@ class Quick2DPlot(object):
             dpi = params.dpi
         else:
             dpi = self.DPI
+        plt.tight_layout()
         if (self.OutputDirectory is not None) and (self.FileName is not None):
             fullname = os.path.join(self.OutputDirectory, self.FileName)
             pprint('Saving File: {0} dpi={1}'.format(fullname, dpi))
             plt.savefig(fullname, dpi=dpi)
+        # plt.tight_layout(h_pad=0.15)
+        #plt.gcf().subplots_adjust(bottom=0.15)
         plt.show()
 
 
